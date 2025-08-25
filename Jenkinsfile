@@ -11,7 +11,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: "${env.GIT_BRANCH}", url: 'https://github.com/your-user/your-repo.git'
+                git branch: "${env.GIT_BRANCH}", url: 'https://github.com/PapaEduard/small-feature.git'
             }
         }
 
