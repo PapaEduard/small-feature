@@ -11,4 +11,4 @@ COPY index.php .
 EXPOSE 8000
 
 # Запускаем встроенный PHP-сервер
-ENTRIPOINT ["php", "-S", "0.0.0.0:8000", "index.php"]
+ENTRYPOINT ["php", "-S", "0.0.0.0:8000", "index.php"]
