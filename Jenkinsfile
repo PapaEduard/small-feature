@@ -48,13 +48,4 @@ pipeline {
             }
         }
     }
-
-    post {
-        success {
-            echo 'Pipeline успешно завершён!'
-        }
-        failure {
-            echo 'Что-то пошло не так. Проверьте логи.'
-        }
-    }
 }
