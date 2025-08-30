@@ -2,23 +2,24 @@ pipeline {
     agent any
 
     environment {
-        // Переменные окружения
-        DOCKERHUB_CREDENTIALS = 'dockerhub-creds'
-        IMAGE_NAME           = 'edy2010/index.php'
-        GIT_BRANCH           = "${env.BRANCH_NAME ?: 'main'}"
+       REPO = 'edy2010/php-app'
+       DOCKER_TOKEN = credentials('dok-tok')
+       PRJ_NAME = 'php'
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git branch: "${env.GIT_BRANCH}", url: 'https://github.com/PapaEduard/small-feature.git'
+                checkout scm
             }
         }
 
         stage('Build Docker Image') {
             steps {
                 script {
-                    dockerImage = docker.build("${IMAGE_NAME}:${env.BUILD_NUMBER}")
+                    sh"""
+                    docker build -t "${env.REPO}:${env.PRJ_NAME}-${env.BUILD_NUMBER}" .
+                    """
                 }
             }
         }
@@ -26,26 +27,14 @@ pipeline {
         stage('Push to Docker Hub') {
             steps {
                 script {
-                    docker.withRegistry('https://index.docker.io/v1/', "${DOCKERHUB_CREDENTIALS}") {
-                        dockerImage.push("${env.BUILD_NUMBER}")
-                        dockerImage.push('latest')
-                    }
+                    sh"""
+		            docker login -u edy2010 -p ${env.DOCKER_TOKEN}
+			        docker push "${REPO}:${PRJ_NAME}-${env.BUILD_NUMBER}"
+		            """
                 }
             }
         }
 
-        stage('Deploy') {
-            steps {
-                sshagent (credentials: ['ssh-deploy-creds']) {
-                    sh """
-                      ssh -o StrictHostKeyChecking=no deployer@your.server.com \\
-                      'docker pull ${IMAGE_NAME}:latest && \\
-                       docker stop php-app || true && \\
-                       docker rm php-app || true && \\
-                       docker run -d --name php-app -p 80:80 ${IMAGE_NAME}:latest'
-                    """
-                }
-            }
-        }
+        
     }
 }
